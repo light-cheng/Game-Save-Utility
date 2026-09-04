@@ -11,7 +11,7 @@ use crate::presets;
 use crate::scheduler::BackgroundBackupDecision;
 use crate::steam::{self, SteamGameCandidate};
 use crate::tray;
-use crate::{backup, cloud, scheduler};
+use crate::{backup, cloud, scheduler, snapshot};
 use chrono::Local;
 use eframe::egui;
 use std::collections::BTreeSet;

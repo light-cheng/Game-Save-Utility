@@ -462,12 +462,12 @@ fn backup_history_select_box(
                 visuals.selection.bg_fill.b(),
                 if selection_mode { 118 } else { 52 },
             ),
-            egui::Stroke::new(2.0, visuals.selection.stroke.color),
+            egui::Stroke::new(2.0_f32, visuals.selection.stroke.color),
         )
     } else {
         (
             visuals.widgets.inactive.bg_fill,
-            egui::Stroke::new(1.0, visuals.widgets.inactive.bg_stroke.color),
+            egui::Stroke::new(1.0_f32, visuals.widgets.inactive.bg_stroke.color),
         )
     };
     let (rect, response) = ui.allocate_exact_size(egui::vec2(48.0, 30.0), egui::Sense::click());

@@ -165,7 +165,7 @@ pub fn quick_directory_fingerprint(path: &Path) -> AppResult<Option<QuickDirecto
         }
         let metadata = entry
             .metadata()
-            .map_err(|err| AppError::io("Save file metadata read failed", entry.path(), err))?;
+            .map_err(|err| AppError::io("Save file metadata read failed", entry.path(), err.into()))?;
         file_count += 1;
         total_size += metadata.len();
         if let Ok(mtime) = metadata.modified() {

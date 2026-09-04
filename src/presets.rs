@@ -98,17 +98,15 @@ pub fn first_expanded_path(preset: &PresetGame) -> Option<PathBuf> {
         .map(|path| PathBuf::from(expand_env_vars(path)))
 }
 
-pub fn find_steam_known_paths(
-    app_id: &str,
-    name: &str,
-    install_dir: &Path,
-) -> Vec<PathBuf> {
+pub fn find_steam_known_paths(app_id: &str, name: &str, install_dir: &Path) -> Vec<PathBuf> {
     let lower_name = name.to_lowercase();
     let mut paths = Vec::new();
 
     for def in PRESET_DEFINITIONS {
         let app_id_matches = def.steam_app_id.is_some_and(|id| id == app_id);
-        let name_matches = def.steam_name_keyword.is_some_and(|kw| lower_name.contains(kw));
+        let name_matches = def
+            .steam_name_keyword
+            .is_some_and(|kw| lower_name.contains(kw));
 
         if app_id_matches || name_matches {
             if let Some(subparts) = def.install_subpath {
@@ -140,7 +138,8 @@ mod tests {
         let paths = find_steam_known_paths("1245620", "ELDEN RING", Path::new("test"));
         assert_eq!(paths.len(), 1);
 
-        let paths_wukong = find_steam_known_paths("2358720", "Black Myth: Wukong", Path::new("C:/games/b1"));
+        let paths_wukong =
+            find_steam_known_paths("2358720", "Black Myth: Wukong", Path::new("C:/games/b1"));
         assert_eq!(paths_wukong.len(), 1);
         assert!(paths_wukong[0].ends_with("SaveGames"));
     }

@@ -154,7 +154,8 @@ pub struct GameSaveApp {
     pub(crate) force_exit_requested: bool,
     pub(crate) last_window_settings_save: Instant,
     pub(crate) last_background_check: Instant,
-    pub(crate) last_save_fingerprints: std::collections::HashMap<String, snapshot::QuickDirectoryFingerprint>,
+    pub(crate) last_save_fingerprints:
+        std::collections::HashMap<String, snapshot::QuickDirectoryFingerprint>,
 }
 
 impl GameSaveApp {
@@ -1227,11 +1228,14 @@ impl GameSaveApp {
             };
 
             let save_path = crate::fs_utils::expand_path(&game.save_path);
-            let current_fp = snapshot::quick_directory_fingerprint(&save_path).ok().flatten();
-            let unchanged_by_fingerprint = match (&current_fp, self.last_save_fingerprints.get(&game_id)) {
-                (Some(curr), Some(prev)) => curr == prev,
-                _ => false,
-            };
+            let current_fp = snapshot::quick_directory_fingerprint(&save_path)
+                .ok()
+                .flatten();
+            let unchanged_by_fingerprint =
+                match (&current_fp, self.last_save_fingerprints.get(&game_id)) {
+                    (Some(curr), Some(prev)) => curr == prev,
+                    _ => false,
+                };
 
             let change_state = if unchanged_by_fingerprint {
                 scheduler::BackupChangeState::NoChanges

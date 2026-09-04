@@ -641,8 +641,12 @@ mod error_tests {
         );
 
         let err2 = AppError::message("暂不支持包含符号链接的存档目录: C:\\save");
-        assert!(err2.user_message_for_language(Language::EnUs).contains("Symlinked save folders"));
-        assert!(err2.user_message_for_language(Language::ZhCn).contains("暂不支持包含符号链接"));
+        assert!(err2
+            .user_message_for_language(Language::EnUs)
+            .contains("Symlinked save folders"));
+        assert!(err2
+            .user_message_for_language(Language::ZhCn)
+            .contains("暂不支持包含符号链接"));
     }
 
     #[test]

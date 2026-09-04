@@ -163,9 +163,9 @@ pub fn quick_directory_fingerprint(path: &Path) -> AppResult<Option<QuickDirecto
         if file_type.is_symlink() || !file_type.is_file() {
             continue;
         }
-        let metadata = entry
-            .metadata()
-            .map_err(|err| AppError::io("Save file metadata read failed", entry.path(), err.into()))?;
+        let metadata = entry.metadata().map_err(|err| {
+            AppError::io("Save file metadata read failed", entry.path(), err.into())
+        })?;
         file_count += 1;
         total_size += metadata.len();
         if let Ok(mtime) = metadata.modified() {

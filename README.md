@@ -20,11 +20,17 @@
 
 项目使用 Rust + eframe/egui 开发，目标是生成尽量独立的单个 exe 文件。运行应用不需要安装 Node、Python、Java、Electron 或 .NET Runtime。
 
-### 版本 0.1.2
+### 版本 0.1.3
 
-0.1.2 是一个维护与稳定性增强版本，重点改进备份安全、配置恢复、错误提示本地化和 Windows 发布验证。
+0.1.3 重点改进后台性能优化、架构规范、自动化发布流程、开源合规以及错误提示本地化加固。
 
-本版本不包含重大新功能，主要修复和优化自动备份清理、增量备份恢复校验、配置备份恢复、应用数据标识迁移、中英文错误提示一致性等问题。
+主要亮点包括：
+- **性能优化**：引入轻量文件指纹优先检测机制，消除 UI 主线程在后台定时检查存档变更时的全盘 SHA-256 哈希计算开销，彻底杜绝界面卡顿。
+- **开源合规**：添加 MIT 开源许可证及完整的 Cargo 包仓库与说明文档元数据。
+- **CI/CD 自动化**：建立基于 GitHub Actions 的自动化发布工作流，在推送版本标签时自动测试、打包并发布 Release。
+- **架构去重**：重构并统一游戏预设与 Steam 识别规则，以 `presets.rs` 作为单一事实来源。
+- **双语对齐**：彻底修复中英文错误提示的泄漏与回退不对称，提供完整的本地化错误提示。
+- **规范整洁**：规范发布资产命名规则，整理归档截图至 `docs/images/` 目录。
 
 本项目定位为 Windows 单平台工具。新应用数据目录为 `%LOCALAPPDATA%\GameSaveUtility`；旧 `GameSaveBackupTool` 数据目录和位置文件仍会兼容识别，并在安全条件满足时迁移。
 
@@ -198,9 +204,9 @@ cargo build --release
 生成文件示例：
 
 ```text
-target/release/GameSaveUtility-v0.1.2-windows-x64.exe
-target/release/GameSaveUtility-v0.1.2-windows-x64.zip
-target/release/GameSaveUtility-v0.1.2-windows-x64.sha256
+target/release/GameSaveUtility-v0.1.3-windows-x64.exe
+target/release/GameSaveUtility-v0.1.3-windows-x64.zip
+target/release/GameSaveUtility-v0.1.3-windows-x64.sha256
 ```
 
 脚本会按 `Cargo.toml` 中的版本号生成文件名。发布构建已启用 LTO、单代码生成单元和 strip。
@@ -259,7 +265,6 @@ scripts/
 - 备份和恢复后台任务
 - 大文件复制进度条
 - Steam 扫描后台化
-- 自动备份目录扫描节流，减少主线程 hash 开销
 - 导入、导出配置
 - 搜索游戏
 - 更完整的测试覆盖
@@ -275,11 +280,17 @@ scripts/
 
 The app is built with Rust + eframe/egui and is designed to ship as a mostly self-contained exe. Users do not need Node, Python, Java, Electron, or the .NET Runtime to run it.
 
-### Version 0.1.2
+### Version 0.1.3
 
-Version 0.1.2 is a maintenance and stability release focused on backup safety, configuration recovery, localization consistency, and Windows release verification.
+Version 0.1.3 focuses on background performance optimization, architectural refinement, automated release pipelines, open-source compliance, and localization hardening.
 
-This version does not introduce major new user-facing features. It improves automatic backup cleanup, incremental backup restore validation, configuration backup recovery, app data identifier migration, and Chinese/English user-facing messages.
+Key highlights include:
+- **Performance**: Introduced lightweight directory fingerprint-first change detection to eliminate heavy UI thread SHA-256 disk hashing during background checks, preventing interface stutter.
+- **Compliance**: Added the MIT License and complete package metadata (repository, readme, license) in `Cargo.toml`.
+- **CI/CD Automation**: Established an automated GitHub Actions release workflow triggered on version tag pushes to test, build, and publish releases.
+- **Architecture**: Deduplicated preset game definitions between `presets.rs` and `steam.rs`, making `presets.rs` the single source of truth.
+- **Localization**: Aligned symmetrical Chinese/English error mapping and eliminated technical English leakage on Chinese UI.
+- **Repository Cleanliness**: Standardized release asset naming and relocated screenshots to `docs/images/`.
 
 Game Save Utility remains a Windows-only tool. The new application data directory is `%LOCALAPPDATA%\GameSaveUtility`; legacy `GameSaveBackupTool` data directories and location files remain supported and are migrated when it is safe to do so.
 
@@ -452,9 +463,9 @@ For user-facing release builds, use the script to produce standard release asset
 Example output:
 
 ```text
-target/release/GameSaveUtility-v0.1.2-windows-x64.exe
-target/release/GameSaveUtility-v0.1.2-windows-x64.zip
-target/release/GameSaveUtility-v0.1.2-windows-x64.sha256
+target/release/GameSaveUtility-v0.1.3-windows-x64.exe
+target/release/GameSaveUtility-v0.1.3-windows-x64.zip
+target/release/GameSaveUtility-v0.1.3-windows-x64.sha256
 ```
 
 The script reads the version from `Cargo.toml` and creates standardized release filenames. Release builds enable LTO, a single codegen unit, and strip.
@@ -513,7 +524,6 @@ scripts/
 - Background backup and restore tasks
 - File-copy progress reporting
 - Background Steam library scanning
-- Throttled automatic-backup directory hashing
 - Import and export config
 - Game search
 - More complete test coverage

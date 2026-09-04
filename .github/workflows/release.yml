@@ -49,7 +49,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           name: Game Save Utility ${{ steps.vars.outputs.tag }}
-          draft: true
+          draft: false
           prerelease: false
           generate_release_notes: true
           files: |

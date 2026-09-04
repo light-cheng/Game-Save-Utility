@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.1.3] - 2026-09-04
+
+### Summary
+
+This release focuses on background performance optimization, architecture deduplication, release automation, licensing compliance, and localization hardening.
+
+### Added
+
+- **Compliance**: Added MIT License (`LICENSE`) and package repository/readme metadata in `Cargo.toml`.
+- **Automation**: Automated GitHub Actions CI/CD release workflow (`.github/workflows/release.yml`) for tag push (`v*`).
+- Lightweight directory fingerprinting (`QuickDirectoryFingerprint`) for two-tier change verification.
+
+### Improved
+
+- **Performance**: Fingerprint-first change detection in `snapshot.rs`/`app.rs` to eliminate heavy UI thread SHA256 disk hashing during background checks.
+- **Architecture**: Deduplicated preset game definitions between `presets.rs` and `steam.rs`, establishing `presets.rs` as the single source of truth.
+- **Cleanliness**: Standardized release asset naming (`GameSaveUtility-v{version}-windows-x64.*`) and relocated screenshots to `docs/images/`.
+- Dynamically derived Windows PE binary metadata version in `build.rs` from `Cargo.toml`.
+
+### Fixed
+
+- **Localization**: Fixed Chinese/English error message leakage and aligned symmetrical error mapping across all supported languages.
+
 ## [0.1.2] - 2026-06-18
 
 ### Summary

@@ -135,6 +135,53 @@ pub fn materialize_incremental_backup(backup_node_dir: &Path, target_dir: &Path)
     Ok(())
 }
 
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct QuickDirectoryFingerprint {
+    pub file_count: u64,
+    pub total_size: u64,
+    pub latest_mtime: std::time::SystemTime,
+}
+
+pub fn quick_directory_fingerprint(path: &Path) -> AppResult<Option<QuickDirectoryFingerprint>> {
+    if !path.exists() {
+        return Ok(None);
+    }
+    if !path.is_dir() {
+        return Err(AppError::message(format!(
+            "Save path is not a folder: {}",
+            path.display()
+        )));
+    }
+
+    let mut file_count = 0u64;
+    let mut total_size = 0u64;
+    let mut latest_mtime = std::time::SystemTime::UNIX_EPOCH;
+
+    for entry in WalkDir::new(path).follow_links(false) {
+        let entry = entry.map_err(|err| AppError::message(format!("Save walk failed: {err}")))?;
+        let file_type = entry.file_type();
+        if file_type.is_symlink() || !file_type.is_file() {
+            continue;
+        }
+        let metadata = entry
+            .metadata()
+            .map_err(|err| AppError::io("Save file metadata read failed", entry.path(), err))?;
+        file_count += 1;
+        total_size += metadata.len();
+        if let Ok(mtime) = metadata.modified() {
+            if mtime > latest_mtime {
+                latest_mtime = mtime;
+            }
+        }
+    }
+
+    Ok(Some(QuickDirectoryFingerprint {
+        file_count,
+        total_size,
+        latest_mtime,
+    }))
+}
+
 pub fn calculate_directory_snapshot_hash(path: &Path) -> AppResult<Option<String>> {
     if !path.exists() {
         return Ok(None);
@@ -454,6 +501,29 @@ mod tests {
         fs::write(&path, serde_json::to_vec(&manifest).unwrap()).unwrap();
 
         assert_eq!(read_manifest(&path).unwrap().files.len(), 1);
+    }
+
+    #[test]
+    fn quick_directory_fingerprint_detects_changes() {
+        let root = tempdir().unwrap();
+        let save = root.path().join("save");
+        fs::create_dir_all(&save).unwrap();
+        let fp1 = quick_directory_fingerprint(&save).unwrap().unwrap();
+        assert_eq!(fp1.file_count, 0);
+        assert_eq!(fp1.total_size, 0);
+
+        let file = save.join("slot.sav");
+        fs::write(&file, "first").unwrap();
+        let fp2 = quick_directory_fingerprint(&save).unwrap().unwrap();
+        assert_eq!(fp2.file_count, 1);
+        assert_eq!(fp2.total_size, 5);
+        assert_ne!(fp1, fp2);
+
+        fs::write(&file, "first-modified").unwrap();
+        let fp3 = quick_directory_fingerprint(&save).unwrap().unwrap();
+        assert_eq!(fp3.file_count, 1);
+        assert_eq!(fp3.total_size, 14);
+        assert_ne!(fp2, fp3);
     }
 
     #[test]

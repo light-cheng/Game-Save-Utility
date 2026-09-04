@@ -16,11 +16,6 @@
 
 ## 简体中文
 
-<p align="center">
-  <a href="#zh-cn">简体中文</a> |
-  <a href="#en">English</a>
-</p>
-
 **Game Save Utility** 是一个轻量的 Windows 桌面应用，用于手动管理任意单机游戏的本地存档备份与恢复。
 
 项目使用 Rust + eframe/egui 开发，目标是生成尽量独立的单个 exe 文件。运行应用不需要安装 Node、Python、Java、Electron 或 .NET Runtime。
@@ -35,7 +30,7 @@
 
 ### 界面截图
 
-![中文界面](./中文界面-latest.png)
+![中文界面](./docs/images/中文界面-latest.png)
 
 ### 主要功能
 
@@ -194,7 +189,7 @@ cargo test
 cargo build --release
 ```
 
-正式发布建议使用脚本，脚本会在私有构建目录中编译，并只把面向用户的正式文件放入 release 目录：
+正式发布建议使用脚本，脚本会在私有构建目录中编译，生成标准发布文件（包含 exe、zip 压缩包以及 sha256 校验和）：
 
 ```powershell
 .\scripts\build-release.ps1
@@ -203,7 +198,9 @@ cargo build --release
 生成文件示例：
 
 ```text
-target/release/Game_Save_Utility_V0.1.2.exe
+target/release/GameSaveUtility-v0.1.2-windows-x64.exe
+target/release/GameSaveUtility-v0.1.2-windows-x64.zip
+target/release/GameSaveUtility-v0.1.2-windows-x64.sha256
 ```
 
 脚本会按 `Cargo.toml` 中的版本号生成文件名。发布构建已启用 LTO、单代码生成单元和 strip。
@@ -211,7 +208,7 @@ target/release/Game_Save_Utility_V0.1.2.exe
 ### 重要命名约定
 
 - 项目正式名称和用户可见名称统一为 `Game Save Utility`。
-- 正式发布文件名必须带版本号，例如 `Game_Save_Utility_V0.1.2.exe`。
+- 正式发布文件名格式为 `GameSaveUtility-v{version}-windows-x64.exe`（及对应的 `.zip`、`.sha256`）。
 - Cargo 内部包名为 `game-save-utility`。
 - 不要再使用旧名称 `game-save-backup-tool` 作为项目名或发布文件名。
 
@@ -274,11 +271,6 @@ scripts/
 
 ## English
 
-<p align="center">
-  <a href="#zh-cn">简体中文</a> |
-  <a href="#en">English</a>
-</p>
-
 **Game Save Utility** is a lightweight Windows desktop app for manually backing up and restoring local save files for single-player games.
 
 The app is built with Rust + eframe/egui and is designed to ship as a mostly self-contained exe. Users do not need Node, Python, Java, Electron, or the .NET Runtime to run it.
@@ -293,7 +285,7 @@ Game Save Utility remains a Windows-only tool. The new application data director
 
 ### Screenshot
 
-![English interface](./英文界面-latest.png)
+![English interface](./docs/images/英文界面-latest.png)
 
 ### Features
 
@@ -451,7 +443,7 @@ For development builds:
 cargo build --release
 ```
 
-For user-facing release builds, use the script:
+For user-facing release builds, use the script to produce standard release assets (including executable, zip archive, and sha256 checksums):
 
 ```powershell
 .\scripts\build-release.ps1
@@ -460,15 +452,17 @@ For user-facing release builds, use the script:
 Example output:
 
 ```text
-target/release/Game_Save_Utility_V0.1.2.exe
+target/release/GameSaveUtility-v0.1.2-windows-x64.exe
+target/release/GameSaveUtility-v0.1.2-windows-x64.zip
+target/release/GameSaveUtility-v0.1.2-windows-x64.sha256
 ```
 
-The script reads the version from `Cargo.toml` and creates a versioned release filename. Release builds enable LTO, a single codegen unit, and strip.
+The script reads the version from `Cargo.toml` and creates standardized release filenames. Release builds enable LTO, a single codegen unit, and strip.
 
 ### Naming Rules
 
 - The official project and user-facing name is `Game Save Utility`.
-- Release exe filenames must include the version, for example `Game_Save_Utility_V0.1.2.exe`.
+- Release exe filenames must follow the pattern `GameSaveUtility-v{version}-windows-x64.exe` (and matching `.zip`, `.sha256`).
 - The internal Cargo package name is `game-save-utility`.
 - Do not use the old name `game-save-backup-tool` for the project or release files.
 

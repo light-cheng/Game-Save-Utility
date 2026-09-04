@@ -202,39 +202,7 @@ fn save_path_candidates(
 }
 
 fn known_save_paths(app_id: &str, name: &str, install_dir: &Path) -> Vec<(PathBuf, String)> {
-    let mut paths = Vec::new();
-    let lower_name = name.to_lowercase();
-
-    if app_id == "1091500" || lower_name.contains("cyberpunk 2077") {
-        paths.push(expanded(
-            "%USERPROFILE%/Saved Games/CD Projekt Red/Cyberpunk 2077",
-        ));
-    }
-    if app_id == "1245620" || lower_name.contains("elden ring") {
-        paths.push(expanded("%APPDATA%/EldenRing"));
-    }
-    if app_id == "2358720" || lower_name.contains("black myth") {
-        paths.push(install_dir.join("b1").join("Saved").join("SaveGames"));
-    }
-    if app_id == "292030" || lower_name.contains("witcher 3") {
-        paths.push(expanded("%USERPROFILE%/Documents/The Witcher 3/gamesaves"));
-    }
-    if app_id == "413150" || lower_name.contains("stardew valley") {
-        paths.push(expanded("%APPDATA%/StardewValley/Saves"));
-    }
-    if app_id == "814380" || lower_name.contains("sekiro") {
-        paths.push(expanded("%APPDATA%/Sekiro"));
-    }
-    if app_id == "1086940" || lower_name.contains("baldur's gate 3") {
-        paths.push(expanded(
-            "%LOCALAPPDATA%/Larian Studios/Baldur's Gate 3/PlayerProfiles",
-        ));
-    }
-    if app_id == "1623730" || lower_name.contains("palworld") {
-        paths.push(expanded("%LOCALAPPDATA%/Pal/Saved/SaveGames"));
-    }
-
-    paths
+    crate::presets::find_steam_known_paths(app_id, name, install_dir)
         .into_iter()
         .map(|path| (path, "内置常见路径".to_owned()))
         .collect()

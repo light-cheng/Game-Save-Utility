@@ -578,8 +578,23 @@ fn localize_error_message(message: &str, language: Language) -> String {
             "无法定位应用数据目录，请检查 LOCALAPPDATA 环境变量",
             "The application data folder could not be located; check the LOCALAPPDATA environment variable",
         )
+    } else if message.starts_with("未找到 Steam 安装目录") {
+        (
+            "未找到 Steam 安装目录。请确认已安装 Steam，或手动添加游戏。",
+            "Steam installation folder not found. Verify Steam is installed, or add games manually.",
+        )
     } else if message.starts_with("未找到 Steam 库目录") {
         ("未找到 Steam 库目录", "No Steam library folder was found")
+    } else if message.starts_with("暂不支持包含符号链接的存档目录") {
+        (
+            "暂不支持包含符号链接的存档目录",
+            "Symlinked save folders are currently not supported",
+        )
+    } else if message.starts_with("暂不支持复制符号链接") {
+        (
+            "暂不支持复制符号链接",
+            "Copying symlinks is currently not supported",
+        )
     } else {
         return match language {
             Language::ZhCn
@@ -612,6 +627,23 @@ pub type AppResult<T> = Result<T, AppError>;
 #[cfg(test)]
 mod error_tests {
     use super::*;
+
+    #[test]
+    fn steam_and_symlink_errors_are_localized_symmetrically() {
+        let err1 = AppError::message("未找到 Steam 安装目录。请确认已安装 Steam，或手动添加游戏。");
+        assert_eq!(
+            err1.user_message_for_language(Language::EnUs),
+            "Steam installation folder not found. Verify Steam is installed, or add games manually."
+        );
+        assert_eq!(
+            err1.user_message_for_language(Language::ZhCn),
+            "未找到 Steam 安装目录。请确认已安装 Steam，或手动添加游戏。"
+        );
+
+        let err2 = AppError::message("暂不支持包含符号链接的存档目录: C:\\save");
+        assert!(err2.user_message_for_language(Language::EnUs).contains("Symlinked save folders"));
+        assert!(err2.user_message_for_language(Language::ZhCn).contains("暂不支持包含符号链接"));
+    }
 
     #[test]
     fn backup_commit_error_is_localized_without_english_context_in_chinese() {

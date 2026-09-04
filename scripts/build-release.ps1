@@ -13,7 +13,13 @@ if ($versionLine -notmatch '^\s*version\s*=\s*"([^"]+)"') {
     Write-Error "Could not read package version from Cargo.toml."
 }
 $version = $Matches[1]
-$releaseExe = Join-Path $releaseDir "Game_Save_Utility_V$version.exe"
+
+$assetBaseName = "GameSaveUtility-v$version-windows-x64"
+$releaseExe = Join-Path $releaseDir "$assetBaseName.exe"
+$releaseZip = Join-Path $releaseDir "$assetBaseName.zip"
+$releaseChecksum = Join-Path $releaseDir "$assetBaseName.sha256"
+
+$legacyNamedExe = Join-Path $releaseDir "Game_Save_Utility_V$version.exe"
 $legacyReleaseExe = Join-Path $releaseDir "Game Save Utility.exe"
 $legacyCargoExe = Join-Path $releaseDir "game-save-utility.exe"
 $oldPackageExe = Join-Path $releaseDir "game-save-backup-tool.exe"
@@ -24,10 +30,26 @@ New-Item -ItemType Directory -Path $releaseDir -Force | Out-Null
 if (Test-Path $sourceExe) {
     Copy-Item -LiteralPath $sourceExe -Destination $releaseExe -Force
     Remove-Item -LiteralPath $sourceExe -Force -ErrorAction SilentlyContinue
+    Remove-Item -LiteralPath $legacyNamedExe -Force -ErrorAction SilentlyContinue
     Remove-Item -LiteralPath $legacyReleaseExe -Force -ErrorAction SilentlyContinue
     Remove-Item -LiteralPath $legacyCargoExe -Force -ErrorAction SilentlyContinue
     Remove-Item -LiteralPath $oldPackageExe -Force -ErrorAction SilentlyContinue
-    Write-Host "Build complete: $releaseExe"
+
+    if (Test-Path $releaseZip) {
+        Remove-Item -LiteralPath $releaseZip -Force -ErrorAction SilentlyContinue
+    }
+    Compress-Archive -LiteralPath $releaseExe -DestinationPath $releaseZip -Force
+
+    $exeHash = (Get-FileHash -LiteralPath $releaseExe -Algorithm SHA256).Hash.ToLower()
+    $zipHash = (Get-FileHash -LiteralPath $releaseZip -Algorithm SHA256).Hash.ToLower()
+
+    $checksumContent = "$exeHash *$assetBaseName.exe`r`n$zipHash *$assetBaseName.zip`r`n"
+    [System.IO.File]::WriteAllText($releaseChecksum, $checksumContent, [System.Text.Encoding]::UTF8)
+
+    Write-Host "Build complete:"
+    Write-Host "  Executable: $releaseExe"
+    Write-Host "  Archive:    $releaseZip"
+    Write-Host "  Checksums:  $releaseChecksum"
 } else {
     Write-Error "Build finished, but the output exe was not found."
 }

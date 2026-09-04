@@ -154,6 +154,7 @@ pub struct GameSaveApp {
     pub(crate) force_exit_requested: bool,
     pub(crate) last_window_settings_save: Instant,
     pub(crate) last_background_check: Instant,
+    pub(crate) last_save_fingerprints: std::collections::HashMap<String, snapshot::QuickDirectoryFingerprint>,
 }
 
 impl GameSaveApp {
@@ -269,6 +270,7 @@ impl GameSaveApp {
             force_exit_requested: false,
             last_window_settings_save: Instant::now(),
             last_background_check: Instant::now(),
+            last_save_fingerprints: std::collections::HashMap::new(),
         };
         app.refresh_backups();
         app
@@ -1224,26 +1226,42 @@ impl GameSaveApp {
                 continue;
             };
 
-            let change_state = match scheduler::backup_change_state(&self.config, &game) {
-                Ok(state) => state,
-                Err(err) => {
-                    logger::warn(format!(
-                        "Background save change check failed for {}: {}",
-                        game.name, err
-                    ));
-                    if self.selected_game_id.as_deref() == Some(game_id.as_str()) {
-                        self.status = StatusMessage::warning(match self.language() {
-                            Language::ZhCn => format!(
-                                "自动备份检查失败：{}",
-                                err.user_message_for_language(Language::ZhCn)
-                            ),
-                            Language::EnUs => format!(
-                                "Automatic backup check failed: {}",
-                                err.user_message_for_language(Language::EnUs)
-                            ),
-                        });
+            let save_path = crate::fs_utils::expand_path(&game.save_path);
+            let current_fp = snapshot::quick_directory_fingerprint(&save_path).ok().flatten();
+            let unchanged_by_fingerprint = match (&current_fp, self.last_save_fingerprints.get(&game_id)) {
+                (Some(curr), Some(prev)) => curr == prev,
+                _ => false,
+            };
+
+            let change_state = if unchanged_by_fingerprint {
+                scheduler::BackupChangeState::NoChanges
+            } else {
+                match scheduler::backup_change_state(&self.config, &game) {
+                    Ok(state) => {
+                        if let Some(fp) = current_fp {
+                            self.last_save_fingerprints.insert(game_id.clone(), fp);
+                        }
+                        state
                     }
-                    continue;
+                    Err(err) => {
+                        logger::warn(format!(
+                            "Background save change check failed for {}: {}",
+                            game.name, err
+                        ));
+                        if self.selected_game_id.as_deref() == Some(game_id.as_str()) {
+                            self.status = StatusMessage::warning(match self.language() {
+                                Language::ZhCn => format!(
+                                    "自动备份检查失败：{}",
+                                    err.user_message_for_language(Language::ZhCn)
+                                ),
+                                Language::EnUs => format!(
+                                    "Automatic backup check failed: {}",
+                                    err.user_message_for_language(Language::EnUs)
+                                ),
+                            });
+                        }
+                        continue;
+                    }
                 }
             };
 
@@ -1788,6 +1806,7 @@ mod tests {
             force_exit_requested: false,
             last_window_settings_save: Instant::now(),
             last_background_check: Instant::now(),
+            last_save_fingerprints: std::collections::HashMap::new(),
         }
     }
 }

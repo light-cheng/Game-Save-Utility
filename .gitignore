@@ -7,3 +7,7 @@ review_bundle/
 optimized_review_bundle/
 *.zip
 /dist/
+.DS_Store
+SPEC.md
+Project-Spec/
+.scratch/

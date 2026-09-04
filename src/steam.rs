@@ -1,4 +1,3 @@
-use crate::fs_utils::expand_env_vars;
 use crate::models::{AppError, AppResult};
 use std::collections::HashSet;
 use std::env;
@@ -206,10 +205,6 @@ fn known_save_paths(app_id: &str, name: &str, install_dir: &Path) -> Vec<(PathBu
         .into_iter()
         .map(|path| (path, "内置常见路径".to_owned()))
         .collect()
-}
-
-fn expanded(path: &str) -> PathBuf {
-    PathBuf::from(expand_env_vars(path))
 }
 
 fn push_save_candidate(
